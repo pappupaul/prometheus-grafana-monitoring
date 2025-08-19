@@ -12,4 +12,4 @@ source ../.env
 set +a
 
 # Run the ansible playbook with all arguments passed to this script
-ansible-playbook -i inventory.ini "$@"
+ansible-playbook -i inventory.ini install_node_exporter.yml
