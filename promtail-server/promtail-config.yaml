@@ -3,13 +3,11 @@ server:
 
 positions:
   filename: /tmp/positions.yaml
-  ignore_old_positions: true  # Start reading from the end of files
-  read_from_head: false      # Don't read from beginning of files
 
 clients:
-  - url: http://LOKI_HOST:3100/loki/api/v1/push  # Replace LOKI_HOST with your Loki server address
+  - url: http://167.172.70.195:3100/loki/api/v1/push
     batchwait: 10s          # Wait up to 10s to batch logs
-    batchsize: 256000       # Batch size in bytes (250KB)
+    batchsize: 102400       # Batch size in bytes (100KB)
     backoff_config:
       min_period: 1s
       max_period: 5m
@@ -26,18 +24,11 @@ scrape_configs:
           host: ${HOSTNAME}
           __path__: /var/log/*.log
     pipeline_stages:
-      - timestamp:
-          source: time
-          format: RFC3339
-      - drop:
-          older_than: 12h   # Only keep logs from last 12 hours
-      - ratelimit:
-          rate: 256000     # bytes per second (250KB/s)
-          burst: 512000    # burst size in bytes (500KB)
-    file_watch_config:
-      min_poll_frequency: 10s
-      max_poll_frequency: 1m
-    read_from_head: false   # Start reading from end of file
+      - match:
+          selector: '{job="system"}'
+          stages:
+            - drop:
+                older_than: 12h
 
   - job_name: django
     static_configs:
@@ -48,15 +39,8 @@ scrape_configs:
           host: ${HOSTNAME}
           __path__: /django-logs/django_requests.log
     pipeline_stages:
-      - timestamp:
-          source: time
-          format: RFC3339
-      - drop:
-          older_than: 12h   # Only keep logs from last 12 hours
-      - ratelimit:
-          rate: 256000     # bytes per second (250KB/s)
-          burst: 512000    # burst size in bytes (500KB)
-    file_watch_config:
-      min_poll_frequency: 10s
-      max_poll_frequency: 1m
-    read_from_head: false   # Start reading from end of file
+      - match:
+          selector: '{job="django"}'
+          stages:
+            - drop:
+                older_than: 12h
