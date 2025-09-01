@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    volumes:
+      - ./promtail-config.yaml:/etc/promtail/config.yml
+      - /var/log:/var/log     # Mount host logs directory
+      - /django-logs:/django-logs  # Mount application logs directory
+    ports:
+      - "9080:9080"
+    command:
+      - -config.file=/etc/promtail/config.yml
+    restart: unless-stopped
+    networks:
+      - promtail-network
+
+networks:
+  promtail-network:
+    driver: bridge
