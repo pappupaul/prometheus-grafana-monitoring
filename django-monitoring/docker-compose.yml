@@ -16,13 +16,3 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     depends_on:
       - loki
-
-  promtail:
-    image: grafana/promtail:2.9.4
-    container_name: promtail
-    volumes:
-      - /Users/pappu/Desktop/oto-backend-v2/django-logs:/django-logs:ro
-      - ./promtail-config.yaml:/etc/promtail/promtail-config.yaml
-    command: -config.file=/etc/promtail/promtail-config.yaml
-    depends_on:
-      - loki
