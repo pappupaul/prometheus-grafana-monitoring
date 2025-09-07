@@ -30,31 +30,41 @@ scrape_configs:
         target_label: 'stream'
     pipeline_stages:
       - regex:
-          expression: '^(?P<json_log>\{.*\})$'
-      - json:
-          expressions:
-            trace_id: json_log.trace_id
-            method: json_log.method
-            path: json_log.path
-            status: json_log.status
-            event: json_log.event
-            timestamp: json_log.timestamp
-            logger: json_log.logger
-            level: json_log.level
-      - output:
-          source: .
+          expression: 'trace_id[":= ]+(?P<trace_id>[a-zA-Z0-9\-]+)'
       - match:
           selector: '{trace_id!=""}'
           stages:
             - labels:
                 trace_id: trace_id
-                method: method
-                path: path
-                status: status
-                event: event
-                logger: logger
-                level: level
       - drop:
-          expression: "!has_key(.trace_id)"
-
-
+          source: trace_id
+          expression: '^$'
+    # pipeline_stages:
+    #   - regex:
+    #       expression: '^(?P<json_log>\{.*\})$'
+    #   - json:
+    #       expressions:
+    #         trace_id: json_log.trace_id
+    #         method: json_log.method
+    #         path: json_log.path
+    #         status: json_log.status
+    #         event: json_log.event
+    #         timestamp: json_log.timestamp
+    #         logger: json_log.logger
+    #         level: json_log.level
+    #   - output:
+    #       source: .
+    #   - match:
+    #       selector: '{trace_id!=""}'
+    #       stages:
+    #         - labels:
+    #             trace_id: trace_id
+    #             method: method
+    #             path: path
+    #             status: status
+    #             event: event
+    #             logger: logger
+    #             level: level
+      # - drop:
+      #     source: trace_id
+      #     expression: '^$'
