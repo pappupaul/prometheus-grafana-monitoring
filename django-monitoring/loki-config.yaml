@@ -1,0 +1,15 @@
+frontend:
+  max_outstanding_requests: 4096        # was 1024 or lower
+  compress_responses: true
+  log_queries_longer_than: 10s
+
+frontend_worker:
+  parallelism: 4                        # increase if queriers have headroom
+
+querier:
+  max_concurrent: 16                    # per querier concurrency
+
+limits_config:
+  max_query_parallelism: 64
+  split_queries_by_interval: 15m        # shard long ranges
+  max_entries_limit_per_query: 5000     # cap per-chunk results

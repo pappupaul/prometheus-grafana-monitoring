@@ -5,7 +5,7 @@ positions:
   filename: /tmp/positions.yaml
 
 clients:
-  - url: http://167.172.70.195:3100/loki/api/v1/push
+  - url: ${LOKI_URL}
     batchwait: 10s          # Wait up to 10s to batch logs
     batchsize: 102400       # Batch size in bytes (100KB)
     backoff_config:
@@ -15,13 +15,13 @@ clients:
     timeout: 15s
 
 scrape_configs:
-  - job_name: python_green
+  - job_name: ${CONTAINER_NAME}
     docker_sd_configs:
       - host: unix:///var/run/docker.sock
         refresh_interval: 5s
         filters:
           - name: name
-            values: ["python_green"]
+            values: ["${CONTAINER_NAME}"]
     relabel_configs:
       - source_labels: ['__meta_docker_container_name']
         regex: '/(.*)'
@@ -29,22 +29,32 @@ scrape_configs:
       - source_labels: ['__meta_docker_container_log_stream']
         target_label: 'stream'
     pipeline_stages:
+      - regex:
+          expression: '^(?P<json_log>\{.*\})$'
       - json:
           expressions:
-            timestamp: time
-            stream: stream
-            message: log
-      - timestamp:
-          source: timestamp
-          format: RFC3339Nano
-      - labels:
-          stream:
+            trace_id: json_log.trace_id
+            method: json_log.method
+            path: json_log.path
+            status: json_log.status
+            event: json_log.event
+            timestamp: json_log.timestamp
+            logger: json_log.logger
+            level: json_log.level
       - output:
-          source: message
+          source: .
       - match:
-          selector: '{job="python_green"}'
+          selector: '{trace_id!=""}'
           stages:
-            - drop:
-                older_than: 12h
+            - labels:
+                trace_id: trace_id
+                method: method
+                path: path
+                status: status
+                event: event
+                logger: logger
+                level: level
+      - drop:
+          expression: "!has_key(.trace_id)"
 
 

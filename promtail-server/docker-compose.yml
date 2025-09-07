@@ -4,10 +4,10 @@ services:
   promtail:
     image: grafana/promtail:latest
     container_name: promtail
+    env_file:
+      - .env
     volumes:
       - ./promtail-config.yaml:/etc/promtail/config.yml
-      - /var/log:/var/log     # Mount host logs directory
-      - /django-logs:/django-logs  # Mount application logs directory
       - /var/lib/docker/containers:/var/lib/docker/containers:ro   # Docker container logs
       - /var/run/docker.sock:/var/run/docker.sock:ro    # Docker socket for container discovery
     ports:
