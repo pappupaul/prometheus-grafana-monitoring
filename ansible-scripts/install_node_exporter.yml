@@ -1,22 +1,9 @@
 ---
 - name: Install Node Exporter
   hosts: targets
-  become: true  # This is required as we need root privileges
-  gather_facts: no  # Disable fact gathering initially
-  
-  pre_tasks:
-    - name: Install Python 3.8
-      raw: |
-        if ! command -v python3.8 &> /dev/null; then
-          apt-get update
-          apt-get install -y python3.8 python3.8-distutils python3-pip
-          update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
-        fi
-      become: true
-      
-    - name: Set python interpreter to python3.8
-      set_fact:
-        ansible_python_interpreter: /usr/bin/python3.8
+  become: true  # Root privileges required
+  gather_facts: yes  # Use system's default Python (avoid forcing deprecated 3.8)
+  # Python bootstrap removed (Option A). Rely on existing Python >=3.9 provided by OS.
   vars:
     node_exporter_version: "1.9.1"
     node_exporter_arch: "linux-amd64"

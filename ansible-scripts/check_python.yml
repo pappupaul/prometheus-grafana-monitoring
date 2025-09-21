@@ -1,3 +1,6 @@
+## DEPRECATED: This playbook is no longer used (Option A applied)
+## It previously forced installation of Python 3.8, which is now removed.
+## Retained only for reference; safe to delete.
 ---
 - name: Check Python Installation
   hosts: all
